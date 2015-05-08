@@ -40,5 +40,8 @@ The `Landing pages link structure` preference sets where the pages will be loade
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.0 =
 * First Release
+
+= 1.0.1 =
+* Removed unnecessary images from plugin download
