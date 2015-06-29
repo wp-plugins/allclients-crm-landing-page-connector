@@ -10,7 +10,7 @@
  * @return array
  */
 function allclients_core_action_links( $actions, $plugin_file, $plugin_data ) {
-	if ( $plugin_data['Name'] === 'AllClients Plugin' && array_key_exists( 'deactivate', $actions ) ) {
+	if ( $plugin_data['Name'] === 'AllClients CRM Landing Page Connector' && array_key_exists( 'deactivate', $actions ) ) {
 		return array_merge( $actions, array(
 			'settings' => '<a href="' . admin_url( 'options-general.php?page=allclients' ) . '">Settings</a>',
 		) );

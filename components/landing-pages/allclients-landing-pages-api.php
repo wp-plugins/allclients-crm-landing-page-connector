@@ -1,5 +1,37 @@
 <?php
 
+if ( !function_exists( 'allclients_api_get_landing_page_type' ) ) {
+	/**
+	 * Get landing page post type
+	 *
+	 * @param string|null $key
+	 *
+	 * @return array|string
+	 */
+	function allclients_api_get_landing_page_type($key = null) {
+		$type = get_allclients()->get_component('landing-pages')->get_post_type();
+		if ($key && array_key_exists($key, $type)) {
+			return $type[$key];
+		} else {
+			return $type;
+		}
+	}
+}
+
+if ( !function_exists( 'allclients_api_get_landing_page_homepage' ) ) {
+	/**
+	 * Get landing page set as homepage, or null
+	 *
+	 *
+	 * @return WP_Post|null
+	 */
+	function allclients_api_get_landing_page_homepage() {
+		return get_allclients()
+			->get_component('landing-pages')
+			->query_homepage();
+	}
+}
+
 if ( !function_exists( 'allclients_api_get_landing_page_folders' ) ) {
 	/**
 	 * Get landing page folders
@@ -96,6 +128,22 @@ if ( !function_exists( 'allclients_ajax_get_landing_page' ) ) {
 				$page['title'] = trim( $matches[1] );
 			}
 			wp_send_json_success( $page );
+		} catch ( Exception $e ) {
+			wp_send_json_error( $e->getMessage() );
+		}
+	}
+}
+
+if ( !function_exists( 'allclients_ajax_update_landing_pages' ) ) {
+	/**
+	 * Update landing pages information
+	 */
+	function allclients_ajax_update_landing_pages() {
+		try {
+			wp_send_json_success( get_allclients()
+				->get_component('landing-pages')
+				->update_page_data()
+			);
 		} catch ( Exception $e ) {
 			wp_send_json_error( $e->getMessage() );
 		}

@@ -83,6 +83,15 @@ class AllClients_Landing_Pages extends AllClients_Component {
 	}
 
 	/**
+	 * Get landing page post type configuration
+	 * 
+	 * @return array
+	 */
+	public function get_post_type() {
+		return $this->post_type;
+	}
+	
+	/**
 	 * Remove custom post type slug
 	 *
 	 * @param string  $url
@@ -142,22 +151,91 @@ class AllClients_Landing_Pages extends AllClients_Component {
 			return;
 		}
 
-		/**
-		 * Fetch the post type
-		 */
-		$post_query = $wpdb->prepare( 'SELECT post_type FROM ' . $wpdb->posts . ' WHERE post_name = %s LIMIT 1', $post_name );
-		$post_type  = $wpdb->get_var( $post_query );
-
-		/**
-		 * Modify request query for custom post type
-		 */
-		if ( $post_type === $this->post_type['type'] ) {
-			$query->set( $this->post_type['type'], $post_name );
-			$query->set( 'post_type', $post_type );
-			$query->is_single = true;
-			$query->is_page   = false;
+		if (is_home()) {
+			if ($homepage = $this->query_homepage()) {
+				$query->set( $this->post_type['type'], $homepage->post_name );
+				$query->set( 'post_type', $homepage->post_type );
+				$query->is_single = true;
+				$query->is_page   = false;
+			}
+		} else {
+			/**
+			 * Fetch the post type
+			 */
+			$post_query = $wpdb->prepare( 'SELECT post_type FROM ' . $wpdb->posts . ' WHERE post_name = %s LIMIT 1', $post_name );
+			$post_type  = $wpdb->get_var( $post_query );
+	
+			/**
+			 * Modify request query for custom post type
+			 */
+			if ( $post_type === $this->post_type['type'] ) {
+				$query->set( $this->post_type['type'], $post_name );
+				$query->set( 'post_type', $post_type );
+				$query->is_single = true;
+				$query->is_page   = false;
+			}
 		}
+	}
 
+	/**
+	 * Get landing page set as homepage
+	 * 
+	 * @return WP_Post|null
+	 */
+	public function query_homepage() {
+		$args = array(
+			'post_type'  => $this->post_type['type'],
+			'meta_key'   => 'landing_page_type',
+			'meta_value' => 'homepage',
+		);
+		$query = new WP_Query( $args );
+		$posts = $query->get_posts();
+		return count($posts) === 1 ? $posts[0] : null;
+	}
+
+	/**
+	 * Update post names and titles from API
+	 * 
+	 * @return int number of updates
+	 */
+	public function update_page_data() {
+		$updates = 0;
+		$pages = allclients_api_get_landing_pages('');
+		$query = new WP_Query( $args = array( 'post_type'  => $this->post_type['type'] ) );
+		foreach ( $query->get_posts() as $post ) {
+			/** @var WP_Post $post */
+			$page_id    = get_post_meta( $post->ID, 'landing_page_id', true );
+			$account_id = get_post_meta( $post->ID, 'account_id', true );
+			$page_name  = get_post_meta( $post->ID, 'landing_page_name', true );
+			$page = null;
+			for ($i = 0; $i < count($pages); $i++) {
+				if ($pages[$i]['webformid'] == $page_id && $pages[$i]['accountid'] == $account_id) {
+					$page = $pages[$i];
+					break;
+				}
+			}
+			if (!$page) {
+				continue; // Flag as not found or removed?
+			}
+			if (strcmp($page['name'], $page_name) !== 0) {
+				update_post_meta( $post->ID, 'landing_page_name', $page['name'] );
+				$updates++;
+			}
+			$page_content = allclients_api_get_landing_page_html( $page_id );
+			if ( preg_match( '/<title>([^>]*)<\/title>/si', $page_content, $matches ) && isset( $matches[1] ) ) {
+				$title = trim( $matches[1] );
+			} else {
+				$title = '';
+			}
+			if (strcmp($title, $post->post_title) !== 0) {
+				wp_update_post(array(
+					'ID'         => $post->ID,
+					'post_title' => $title,
+				));
+				$updates++;
+			}
+		}
+		return $updates;
 	}
 
 	/**
@@ -230,8 +308,10 @@ class AllClients_Landing_Pages extends AllClients_Component {
 		$plugin_admin->set_post_type( $this->post_type );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_meta_box' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_get_pages_action' );
+		$this->loader->add_filter( 'manage_'.$this->post_type['type'].'_posts_columns', $plugin_admin, 'cpt_columns_head' );
+		$this->loader->add_filter( 'manage_posts_custom_column', $plugin_admin, 'cpt_columns_content', 10, 2 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
+		$this->loader->add_filter( 'admin_notices', $plugin_admin, 'update_notice' );
 	}
 
 	/**

@@ -354,7 +354,7 @@ class AllClients_API {
 
 		// Verify function is allowed
 		if ( $validate === true && !$this->get_method( $function_name ) ) {
-			_doing_it_wrong(__CLASS__ . "." . __METHOD__ . $function_name, __('Function is not allowed.'), '1.0.1' );
+			_doing_it_wrong(__CLASS__ . "." . __METHOD__ . $function_name, __('Function is not allowed.'), '1.0.2' );
 		}
 
 		return sprintf( '%s/%s.aspx', rtrim( $this->endpoint, '/' ), $function_name );

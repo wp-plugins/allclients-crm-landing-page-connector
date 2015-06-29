@@ -2,8 +2,8 @@
 Contributors: toddbinder, a-mayer
 Tags: AllClients, Landing Page
 Requires at least: 4.0.0
-Tested up to: 4.2.1
-Stable tag: 1.0.1
+Tested up to: 4.2.2
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,3 +45,6 @@ The `Landing pages link structure` preference sets where the pages will be loade
 
 = 1.0.1 =
 * Removed unnecessary images from plugin download
+
+= 1.0.2 =
+* Added option to set Landing Page as homepage

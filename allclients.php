@@ -12,7 +12,7 @@
  * Plugin Name:       AllClients.com Landing Page Integration
  * Plugin URI:        https://wordpress.org/plugins/allclients/
  * Description:       Integrates WordPress with AllClients
- * Version:           1.0.0
+ * Version:           1.0.2
  * Author:            AllClients
  * Author URI:        http://www.allclients.com/
  */
@@ -63,7 +63,7 @@ function get_allclients() {
 		/**
 		 * Initialize plugin.
 		 */
-		$allclients_plugin = new AllClients_Core( 'allclients', '1.0.0', plugin_dir_path( dirname( __FILE__ ) . '/components' ) );
+		$allclients_plugin = new AllClients_Core( 'allclients', '1.0.2', plugin_dir_path( dirname( __FILE__ ) . '/components' ) );
 
 		/**
 		 * Load component definitions.
